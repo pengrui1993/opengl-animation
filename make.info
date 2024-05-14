@@ -1,0 +1,13 @@
+g++ -I/home/pengrui/learn/glad/include/ \
+    -I/usr/local/include/   \
+    -L/usr/local/lib64/ \
+    glad.c Camera.cpp Loader.cpp AnimatedModel.cpp  main.cpp  \
+    -lglm -lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl  \
+    -o main
+#error 
+g++ -I/home/pengrui/learn/glad/include/ \
+    -I/usr/local/include/   \
+    -L/usr/local/lib64/ \
+    glad.c Camera.cpp Loader.cpp AnimatedModel.cpp \
+    -lglm -lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl  \
+    main.cpp   -o main
