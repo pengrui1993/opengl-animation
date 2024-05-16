@@ -108,13 +108,13 @@ int main(void)
         camera->move();
         model.update();
         shader.enable();
-        model.getJointTransforms(pose);
-        camera->getProjectViewMatrixData(mvp);
-        constexpr GLuint textureUnit = 0;
-        auto data = std::make_tuple(mvp,lightDirection
-            ,textureUnit,model.getTextureId(),&pose);
-        shader.passData(data);
-        model.draw();
+            model.getJointTransforms(pose);//ok
+            camera->getProjectViewMatrixData(mvp);//ok
+            constexpr GLuint textureUnit = 0;
+            auto data = std::make_tuple(mvp,lightDirection
+                ,textureUnit,model.getTextureId(),&pose);
+            shader.passData(data);//ok?
+            model.draw();
         shader.disable();
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

@@ -173,6 +173,7 @@ void AnimatedModelShader::passData(PassedData& data){
    auto&& transforms = *std::get<4>(data);
    glCall(glUniformMatrix4fv,projectionViewMatrix,1,GL_FALSE,glm::value_ptr(mvp));
    glCall(glUniform3f,lightDirection,light.r,light.g,light.b);
+
    glCall(glActiveTexture,GL_TEXTURE0+unit);
    glCall(glBindTexture,GL_TEXTURE_2D,tid);
    for(int i=0;i<transforms.size();i++){
@@ -356,7 +357,7 @@ void AnimatedModel::draw(){
     	glCall(glBindVertexArray,vaoid);
         for(int i=0;i<5;i++)
             glCall(glEnableVertexAttribArray,i);
-    	glCall(glPolygonMode,GL_FRONT_AND_BACK, GL_LINE);
+    	//glCall(glPolygonMode,GL_FRONT_AND_BACK, GL_LINE);
         glCall(glDrawElements,GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
         for(int i=0;i<5;i++)
             glCall(glDisableVertexAttribArray,i);

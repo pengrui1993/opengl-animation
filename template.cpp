@@ -160,6 +160,7 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glViewport(vx,vy,200,200);
         glClearColor(0,1,0,1);
         /* Render here */
