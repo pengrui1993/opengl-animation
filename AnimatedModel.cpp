@@ -214,6 +214,8 @@ namespace{
             createAttribute(1,meshData.textureCoords,2);
             createAttribute(2,meshData.normals,3);
             createIntAttribute(3,meshData.jointIds,3);
+            createAttribute(4,meshData.vertexWeights,3);
+
         }
         VaoId vaoid;
         int indexCount;
@@ -280,8 +282,8 @@ namespace{
         glCall(glActiveTexture,GL_TEXTURE0);
         glCall(glBindTexture,GL_TEXTURE_2D,id);
         glCall(glPixelStorei,GL_UNPACK_ALIGNMENT,1);
-        glCall(glTexImage2D,GL_TEXTURE_2D
-            ,0,GL_RGBA,width,height,0,GL_BGRA,GL_UNSIGNED_BYTE,data);
+        //glCall(glTexImage2D,GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_BGRA,GL_UNSIGNED_BYTE,data);//TODO
+        glCall(glTexImage2D,GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
         glCall(glGenerateMipmap,GL_TEXTURE_2D);
         glCall(glTexParameteri,GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
         glCall(glTexParameteri,GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
@@ -365,7 +367,7 @@ void AnimatedModel::draw(){
 }
 void AnimatedModel::update(){
         if(!currentAnimation||stop)return;
-        animationTime+= (1.0f/50);
+        animationTime+= (1.0f/650);
         if(repeatAnimation){
             if(animationTime>=currentAnimation->length)
                 animationTime -= currentAnimation->length;

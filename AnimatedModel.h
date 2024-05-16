@@ -97,7 +97,6 @@ private:
     List animations;
 };
 class Joint{
-
     using String = std::string;
     using Chlid = std::shared_ptr<Joint>;
     using Children = std::vector<Chlid>;
