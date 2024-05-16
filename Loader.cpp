@@ -13,9 +13,20 @@
 #include<stdexcept>
 #define PRINT(line) std::cout << (line) << std::endl
 namespace{
+    void mprint(const mat4 m){
+        std::printf("[%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f]\n"
+            ,m[0][0],m[1][0],m[2][0],m[3][0]
+            ,m[0][1],m[1][1],m[2][1],m[3][1]
+            ,m[0][2],m[1][2],m[2][2],m[3][2]
+            ,m[0][3],m[1][3],m[2][3],m[3][3]
+        );
+    }
+}
+namespace{
     using String = std::string;
     using Strings = std::vector<String>;
     using mat4 = glm::mat4x4;
+   
     template<typename T>
     static int indexOf(const std::vector<T>& v,const T& t){
         auto ret = std::find(v.begin(),v.end(),t);
@@ -261,13 +272,13 @@ namespace{
         JointIds jointIds;
         Weights weights;
         void addJointEffect(int jointId,float weight){
-            for(int i=0;i<weights.size();i++) {
-				if(weight>weights[i]) {
-					jointIds[i] = jointId;//insert
-					weights[i]=weight;//insert
+            for(auto itr=weights.begin();itr!=weights.end();itr++){
+                if(weight>*itr) {
+                    jointIds.insert((itr-weights.begin())+jointIds.begin(),jointId);
+                    weights.insert(itr,weight);
 					return;
 				}
-			}
+            }
 			jointIds.push_back(jointId);//insert
 			weights.push_back(weight);//insert
         }
@@ -361,17 +372,14 @@ namespace{
         virtual float getAnimationTime() override{
             return animationTimeDuration;
         }
-        virtual bool getRootJointData(JointData& data)override {
-            data = rootJointData;
-            return true;
+        virtual JointData& getRootJointData()override {
+            return rootJointData;
         }
-        virtual bool getMeshData(MeshData&data)override{
-            data = mesh;
-            return true;
+        virtual MeshData& getMeshData()override{
+            return mesh;
         }
-        virtual bool getKeyFramesData(KeyFramesData&data)override{
-            data = keyFrameDatas;
-            return true;
+        virtual KeyFramesData& getKeyFramesData()override{
+            return keyFrameDatas;
         }
     private:
         using VertexSkinDataList = std::vector<VertexSkinData>;
@@ -445,11 +453,12 @@ namespace{
                 int row = i%4;
                 localMatrix[row][col] = std::stof(matrixRawData[i]);
             }
-            // glm::transpose(loadMatrix);
+            // localMatrix = glm::transpose(localMatrix);// [col][row] transpose then [row][col]
             if(isRoot){
-                // glm::transpose(root);
+                // glm::transpose(root);//directly set transposed matrix
                 localMatrix  = CORRECTION*localMatrix;
             }
+
             JointData joint(index,nameId,localMatrix);
             jointCount++;
             for(auto childNode:node->getChildren("node")){
@@ -464,6 +473,15 @@ namespace{
 				->getChildWithAttribute("node","id","Armature");
             XmlNode* joinRootNode = armatureNode->getChild("node");
             rootJointData = loadJointData(joinRootNode,true);
+          
+        }
+        void printJoint(JointData& data){
+            std::cout <<"index:"<<data.index<<",name:"<<data.nameId<<std::endl;
+            mprint(data.bindLocalTransform);
+            for(auto& child:data.children){
+                printJoint(child);
+            }
+            std::exit(1);
         }
         void dealWithAlreadyProcessedVertex(VertexData& previousVertex
             , int newTextureIndex, int newNormalIndex
@@ -659,8 +677,10 @@ namespace{
                     }
                     mat4 transform;
                     for(int c=0;c<4;c++){
-                        for(int r=0;r<4;r++){//TODO
-                            transform[c][r] = matrixData[c*4+r];
+                        for(int r=0;r<4;r++){
+                            transform[r][c] = matrixData[c*4+r];
+                            // transform[c][r] = matrixData[c*4+r];
+                            // transform = glm::transpose(transform);
                         }
                     }
                     if(rootJointName==jointNameId){
@@ -670,13 +690,75 @@ namespace{
                 }
             }
         }
+        void printSkin(VertexSkinDataList& list){
+            for(int i=0;i<list.size();i++){
+                auto& item = list[i];
+                std::cout <<"index:"<<i<<",jointId:" << std::endl;
+                for(auto jid:item.jointIds){
+                    std::cout << jid <<' ';
+                }
+                std::cout << std::endl <<"weight:" << std::endl;
+                for(auto weight:item.weights){
+                    std::cout << weight <<' ';
+                }
+                std::cout << std::endl <<"*********"<< std::endl;
+            }
+            std::exit(1);
+        }
+        void printGeometries(){
+            std::cout << "mesh.vertex.count:"<<mesh.vertices.size()/3 << std::endl;
+            std::cout << std::endl << "vertices "<<mesh.vertices.size()<< ":";
+            for(auto data:mesh.vertices){
+                std::cout << data << ' ';
+            }
+            std::cout << std::endl << "vertexWeights "<<mesh.vertexWeights.size()<< ":";
+            for(auto data:mesh.vertexWeights){
+                std::cout << data << ' ';
+            }
+            std::cout << std::endl << "normals "<<mesh.normals.size()<< ":";
+            for(auto data:mesh.normals){
+                std::cout << data << ' ';
+            }
+            std::cout << std::endl << "textureCoords "<<mesh.textureCoords.size()<< ":";
+            for(auto data:mesh.textureCoords){
+                std::cout << data << ' ';
+            }
+            std::cout << std::endl << "indices "<<mesh.indices.size()<< ":";
+            for(auto data:mesh.indices){
+                std::cout << data << ' ';
+            }
+            std::cout << std::endl << "jointIds "<<mesh.jointIds.size()<< ":";
+            for(auto data:mesh.jointIds){
+                std::cout << data << ' ';
+            }
+            std::cout << std::endl;
+            std::exit(1);
+        }
+        void printAnimation(){
+            std::cout << "*******"<< std::endl;
+            for(auto& data:keyFrameDatas){
+                std::cout <<"time:"<<data.time << std::endl;
+                for(auto& t:data.jointTransform){
+                    std::cout << "joint id:" << t.jointNameId << std::endl
+                            <<"matrix:";
+                            mprint(t.jointLocalTransform);
+                            std::cout << "=========" << std::endl;
+                }
+                std::cout << "----------" << std::endl;
+            }
+            std::exit(1);
+        }
         void init(){
             XmlParser parser;
             xmlRoot = parser.loadXmlFile(path);
             VertexSkinDataList vertexSkinDataList = libraryControllers();
+            // printSkin(vertexSkinDataList);//ok
             libraryVisualScenes();
+            // printJoint(rootJointData);//ok
             libraryGeometries(vertexSkinDataList);
+            // printGeometries();//ok
             libraryAnimations();
+            // printAnimation();//ok
         }
     private:
         FilePath path;
@@ -694,7 +776,7 @@ namespace{
         static const mat4 CORRECTION;
         static ID nextId;
     };
-    const mat4 ColladaLoader::CORRECTION{{1,0,0,0},{0,0,-1,0},{0,1,0,0},{0,0,0,0}};
+    const mat4 ColladaLoader::CORRECTION{{1,0,0,0},{0,0,-1,0},{0,1,0,0},{0,0,0,1}};
     ID ColladaLoader::nextId = 0;
   
 }

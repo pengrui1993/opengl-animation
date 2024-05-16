@@ -33,6 +33,7 @@ static auto glCall0(Path file,Line line,GlFunction function)
     function();
     checkError(file,line);
 }
+static void clearError();
 template <typename GlFunction>
 static auto glCall0(Path file,Line line,GlFunction function)
     -> typename std::enable_if<!std::is_same<void

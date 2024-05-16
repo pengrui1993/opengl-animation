@@ -2,7 +2,14 @@
 #include<glad/glad.h>
 #include<iostream>
 #include<cstdlib>
-
+namespace{
+      auto err = []()->std::ostream&{ return std::cerr;};
+}
+void OpenglUtil::clearError(){
+    int count = 0;
+    while(GL_NO_ERROR != glGetError()) count++;
+    if(count)err()<<"clear error count:" << count;
+}
 void OpenglUtil::checkError(const Path& file,Line line){
         // Get the last error
     const GLenum errorCode = glGetError();
@@ -64,12 +71,11 @@ void OpenglUtil::checkError(const Path& file,Line line){
                 break;
             }
         }
-        auto err = []()->std::ostream&{ return std::cerr;};
         err() << "An internal OpenGL call failed in " << file << "(" << line << ")."
               << "\nExpression:\n   " 
               << "\nError description:\n   " << error << "\n   " << description << '\n'
               << std::endl;
         if(exitOnError)
-            std::exit(0);
+            std::exit(2);
     }
 }

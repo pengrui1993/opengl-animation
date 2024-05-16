@@ -5,7 +5,7 @@ class Camera{
 public:
 virtual ~Camera(){}
 virtual void move() = 0;
-virtual bool getProjectViewMatrixData(float[16]) = 0;
+virtual bool getProjectViewMatrixData(glm::mat4&) = 0;
 static Camera* create();
 static void destroy(Camera*);
 };

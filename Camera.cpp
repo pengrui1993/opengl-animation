@@ -4,7 +4,7 @@
 #include<iostream>
 #include<cmath>
 #include<glm/glm.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Camera.h"
 typedef glm::mat4x4 mat4;
 typedef glm::vec3 vec3;
@@ -22,7 +22,20 @@ constexpr float PI = 3.1415926f;
 constexpr int DISPLAY_WIDTH = 640;
 constexpr int DISPLAY_HEIGHT = 480;
 constexpr float rta(float f){
-    return 180/PI*f;
+    return f*180/PI;
+}
+constexpr float atr(float f){
+    return PI*f/180.f;
+}
+namespace{
+    void mprint(const mat4 m){
+        std::printf("[%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f]\n"
+            ,m[0][0],m[1][0],m[2][0],m[3][0]
+            ,m[0][1],m[1][1],m[2][1],m[3][1]
+            ,m[0][2],m[1][2],m[2][2],m[3][2]
+            ,m[0][3],m[1][3],m[2][3],m[3][3]
+        );
+    }
 }
 class CameraImpl: public Camera{
 public:
@@ -31,6 +44,7 @@ public:
         ids.insert(id);
         cameras[id] = this;
         initMatrix();
+        // std::cout << "camera id:" << id<< std::endl;
     }
     virtual ~CameraImpl()override{
         ids.erase(id);
@@ -38,11 +52,13 @@ public:
     }
     virtual void move() override {
         if(!dirty)return;
-        std::cout << "camera id:" << id<< std::endl;
-        viewMatrix = glm::translate(mat4(1),vec3(-position.x,-position.y,-position.z));
+        viewMatrix = glm::rotate(mat4(1),atr(pitch),vec3(1,0,0));
+        viewMatrix = glm::rotate(viewMatrix,atr(yaw),vec3(0,1,0));
+        viewMatrix = glm::translate(viewMatrix,vec3(-position.x,-position.y,-position.z));
         dirty = false;
     }
-    virtual bool getProjectViewMatrixData(float array[16]) override{
+    virtual bool getProjectViewMatrixData(mat4& mat) override{
+        mat = projectMatrix*viewMatrix;
         return true;
     };
     static Camera* create(){
@@ -58,8 +74,8 @@ public:
 private:
     void initMatrix(){
         mat4& m = projectMatrix;
-        float aspectRatio = DISPLAY_WIDTH/DISPLAY_HEIGHT;
-        auto y_scale = 1.0f/tan(rta(FOV/2));
+        float aspectRatio = static_cast<float>(DISPLAY_WIDTH)/static_cast<float>(DISPLAY_HEIGHT);
+        auto y_scale = static_cast<float>(1.0f/tan(atr(FOV/2.f)));
         auto x_scale = y_scale/aspectRatio;
         float frustum_length = FAR_PLANE - NEAR_PLANE;
         m[0][0] = x_scale;
@@ -68,17 +84,15 @@ private:
         m[2][3] = -1;
         m[3][2] = (-((2 * NEAR_PLANE * FAR_PLANE) / frustum_length));
         m[3][3] = 0;
-
-        for(int i=0;i<4;i++)viewMatrix[i][i] = 1;
     }
 private:
     static ID nextId;
 private:
     bool dirty{true};
     ID id;
-    mat4 projectMatrix{0};
-    mat4 viewMatrix{0};
-    vec3 position{0};
+    mat4 projectMatrix{1};
+    mat4 viewMatrix{1};
+    vec3 position{0,6.7f,9.8f};
     float yaw{0};
     float pitch{10};
     float angleAroundPlayer{0};

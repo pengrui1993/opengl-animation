@@ -67,7 +67,7 @@ public:
 class KeyFrameData{
 using TimePoint = float;
 using List = std::vector<JointTransformData>;
-private:
+public:
     TimePoint time;
     List jointTransform;
 public:
@@ -90,9 +90,9 @@ public:
     virtual ~Loader(){}
     virtual int getJointCount() = 0;
     virtual float getAnimationTime() = 0;
-    virtual bool getRootJointData(JointData&) = 0;
-    virtual bool getMeshData(MeshData&) = 0;
-    virtual bool getKeyFramesData(KeyFramesData&) = 0;
+    virtual JointData& getRootJointData() = 0;
+    virtual MeshData& getMeshData() = 0;
+    virtual KeyFramesData& getKeyFramesData() = 0;
     static Loader* create(FilePath,FileType=FileType::COLLADA);
     static void destroy(Loader*);
 };
