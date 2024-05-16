@@ -126,5 +126,6 @@ int main(void)
     glfwTerminate();
     Camera::destroy(camera);
     Loader::destroy(loader);
+    std::exit(0);
     return 0;
 }
