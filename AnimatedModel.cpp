@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cinttypes>
 #include <cstdarg>
+#include <cstring>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -287,9 +288,22 @@ namespace{
         glCall(glGenerateMipmap,GL_TEXTURE_2D);
         glCall(glTexParameteri,GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
         glCall(glTexParameteri,GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
-        bool GL_EXT_texture_filter_anisotropic = false;//TODO
+        bool GL_EXT_texture_filter_anisotropic = false;
+	{
+		GLint num;
+		glGetIntegerv(GL_NUM_EXTENSIONS,&num);
+		for(int i=0;i<num;i++){
+			const char* ext= (const char *)glGetStringi(GL_EXTENSIONS,i);	
+			std::printf("ext:%s\n",ext);
+			if(0==strcmp("GL_EXT_texture_filter_anisotropic",ext)){
+				GL_EXT_texture_filter_anisotropic = true;
+			}
+		}
+	}
         if(GL_EXT_texture_filter_anisotropic){
-            int GL_TEXTURE_MAX_ANISOTROPY_EXT = -1;
+		//see org.lwjgl.opengl.EXTTextureFilterAnisotropic
+            int GL_TEXTURE_MAX_ANISOTROPY_EXT = 0x84fe;
+            int GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT = 0x84ff;
             glCall(glTexParameterf,GL_TEXTURE_2D,GL_TEXTURE_LOD_BIAS,0);
             glCall(glTexParameterf,GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,4.0f);
         }
