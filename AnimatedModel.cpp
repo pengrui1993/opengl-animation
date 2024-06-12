@@ -291,9 +291,10 @@ namespace{
         bool GL_EXT_texture_filter_anisotropic = false;
 	{
 		GLint num;
-		glGetIntegerv(GL_NUM_EXTENSIONS,&num);
+		glCall(glGetIntegerv,GL_NUM_EXTENSIONS,&num);
+		std::cout << "extensions num:" << num << std::endl;
 		for(int i=0;i<num;i++){
-			const char* ext= (const char *)glGetStringi(GL_EXTENSIONS,i);	
+			const char* ext= (const char *)glCall(glGetStringi,GL_EXTENSIONS,i);	
 			std::printf("ext:%s\n",ext);
 			if(0==strcmp("GL_EXT_texture_filter_anisotropic",ext)){
 				GL_EXT_texture_filter_anisotropic = true;
